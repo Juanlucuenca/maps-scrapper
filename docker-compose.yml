@@ -7,10 +7,13 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+      - "5900:5900"  # Puerto VNC para depuración visual
     environment:
-      - HEADLESS=true
+      - HEADLESS=false
       - PORT=8000
       - HOST=0.0.0.0
+      - DISPLAY=:0
+      - LOG_LEVEL=INFO  # Nivel de logging
     volumes:
       - ./logs:/app/logs
     deploy:
