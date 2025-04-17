@@ -44,7 +44,6 @@ def search_google_maps(search_query: SearchGoogleMaps):
     address_list = []
     website_list = []
     phones_list = []
-    schedule_list = []
     
     with sync_playwright() as p:
         # Setup for Docker environment
@@ -56,17 +55,31 @@ def search_google_maps(search_query: SearchGoogleMaps):
             headless=True,
         )
         
+        # Configurar el contexto con ubicación de Argentina
+        context = browser.new_context(
+            locale='es-AR',  # Configurar el idioma como español de Argentina
+            timezone_id='America/Argentina/Buenos_Aires',  # Zona horaria de Argentina
+            geolocation={'latitude': -34.6037, 'longitude': -58.3816},  # Coordenadas de Buenos Aires
+            permissions=['geolocation'],
+            extra_http_headers={
+                'Accept-Language': 'es-AR,es;q=0.9',
+                # Puedes agregar más encabezados si es necesario
+            }
+        )
         
-        # Set viewport size
-        page = browser.new_page()
+        page = context.new_page()
 
         try:
-            # Navigate to Google Maps
+            # Verificar la geolocalización actual (opcional, para debugging)
+            page.goto("https://www.google.com/search?q=mi+ubicacion", timeout=60000)
+            page.wait_for_timeout(2000)
+            
+            # Ahora continuar con Google Maps
             page.goto("https://www.google.com/maps", timeout=60000)
             page.wait_for_timeout(1000)
 
-            # Build search query combining municipality and especiality
-            search_term = f"Restaurante {search_query.especiality} en Mexico, {search_query.municipality}"
+            # Modificar la búsqueda para que sea en Argentina, no en México
+            search_term = f"Restaurante {search_query.especiality} en {search_query.municipality}, Argentina"
             page.locator('//input[@id="searchboxinput"]').fill(search_term)
             page.keyboard.press("Enter")
             
@@ -145,10 +158,6 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     phone = extract_data(phone_xpath, page)
                     phones_list.append(phone)
                     
-                    # Extract schedule using our enhanced function
-                    # schedule = extract_schedule(page)
-                    # schedule_list.append(schedule)
-                    
                 except Exception as e:
                     print(f"Error processing listing: {e}")
                     # Add empty values to maintain list alignment
@@ -156,13 +165,12 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     address_list.append("")
                     website_list.append("")
                     phones_list.append("")
-                    # schedule_list.append("")
         finally:
             # Always close the browser
             browser.close()
         
         # Ensure all lists have the same length by finding the minimum length
-        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list)) #len(schedule_list))
+        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list))
         
         # Create response items
         # Create a dictionary to track unique names and their data
