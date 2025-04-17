@@ -1,17 +1,7 @@
 fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pandas>=2.0.0
+uvicorn==0.23.2
+pydantic==2.4.2
 playwright==1.40.0
-python-dateutil>=2.8.2
-pytz>=2023.3
-typing_extensions>=4.7.0
-pydantic>=2.4.2
-et-xmlfile
-greenlet
-numpy
-openpyxl
-pyee
-six
-python-multipart>=0.0.6
-httpx>=0.24.1
-# Asegúrate de usar Python 3.8-3.12, hay problemas conocidos con 3.13
+python-multipart==0.0.6
+requests==2.31.0
+tenacity==8.2.3

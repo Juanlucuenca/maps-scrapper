@@ -1,12 +1,20 @@
-version: '3'
+version: '3.8'
 
 services:
-  api:
+  maps-scraper:
     build: .
+    container_name: maps-scraper
+    restart: unless-stopped
     ports:
       - "8000:8000"
-    restart: always
+    environment:
+      - HEADLESS=true
+      - PORT=8000
+      - HOST=0.0.0.0
     volumes:
       - ./logs:/app/logs
-    environment:
-      - TZ=America/Mexico_City 
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G

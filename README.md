@@ -1,171 +1,173 @@
-# API de Búsqueda de Restaurantes en Google Maps
+# Google Maps Scraper API
 
-Esta API permite buscar restaurantes en municipios de México con especialidad culinaria específica utilizando web scraping de Google Maps.
+API para extraer información de restaurantes y lugares desde Google Maps.
 
-## Características
+## Requisitos
 
-- Búsqueda de restaurantes por municipio y especialidad
-- API REST con FastAPI
-- Documentación automática con Swagger UI
-- Opciones para limitar el número de resultados
-- Extracción detallada de información de restaurantes:
-  - Nombre, dirección, sitio web, teléfono
-  - Número de reseñas y calificación promedio
-  - Servicios disponibles: entrega, recogida, etc.
-  - Horarios de apertura
-  - Descripción del restaurante
+- Docker y Docker Compose instalados en el servidor
+- Un Droplet de Digital Ocean (recomendado: Ubuntu 22.04)
+- Al menos 2GB de RAM para ejecutar el servicio
 
-## Requisitos del Sistema
+## Estructura del Proyecto
 
-- Python 3.8 - 3.12 (se recomienda 3.10 o 3.11)
-  - **Nota importante**: Hay problemas conocidos con Python 3.13 en Windows
-- Dependencias especificadas en `requirements.txt`
+```
+.
+├── main.py           # Código principal de la API
+├── Dockerfile        # Configuración para construir la imagen Docker
+├── docker-compose.yml # Configuración para orquestar servicios Docker
+├── requirements.txt  # Dependencias de Python
+└── README.md         # Este archivo
+```
 
-## Instalación
+## Despliegue en Digital Ocean
 
-### Usando Python directamente
+### 1. Crear un Droplet en Digital Ocean
 
-1. Clona este repositorio:
-   ```
-   git clone https://github.com/tu-usuario/google-maps-restaurant-api.git
-   cd google-maps-restaurant-api
-   ```
+1. Inicia sesión en tu cuenta de Digital Ocean
+2. Crea un nuevo Droplet con las siguientes especificaciones:
+   - Ubuntu 22.04 (LTS) x64
+   - Plan Básico con al menos 2GB RAM / 1 CPU
+   - Agrega tu clave SSH o configura una contraseña
 
-2. Crea un entorno virtual e instala las dependencias:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
+### 2. Configurar el Servidor
 
-3. Instala los navegadores necesarios para Playwright:
-   ```
-   playwright install chromium
-   playwright install-deps chromium
-   ```
+Una vez creado el Droplet, conéctate a él via SSH:
 
-4. Ejecuta la aplicación:
-   ```
-   uvicorn main:app --reload
-   ```
+```bash
+ssh root@TU_IP_DEL_DROPLET
+```
 
-### Usando Docker (recomendado)
+Actualiza el sistema e instala Docker y Docker Compose:
 
-1. Clona este repositorio y navega al directorio:
-   ```
-   git clone https://github.com/tu-usuario/google-maps-restaurant-api.git
-   cd google-maps-restaurant-api
-   ```
+```bash
+# Actualizar paquetes
+apt update && apt upgrade -y
 
-2. Construye y ejecuta con Docker Compose:
-   ```
-   docker-compose up -d
-   ```
+# Instalar dependencias
+apt install -y apt-transport-https ca-certificates curl software-properties-common
 
-## Uso
+# Agregar clave GPG de Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 
-Una vez que la aplicación esté en ejecución, puedes acceder a los siguientes endpoints:
+# Agregar repositorio de Docker
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
-- **Documentación de la API**: http://localhost:8000/docs
-- **Endpoint de búsqueda (POST)**: http://localhost:8000/api/v1/buscar
-- **Endpoint de búsqueda (GET)**: http://localhost:8000/api/v1/buscar?municipio=Cancun&especialidad=italiana
+# Actualizar e instalar Docker
+apt update
+apt install -y docker-ce
 
-### Ejemplo de solicitud POST:
+# Instalar Docker Compose
+mkdir -p ~/.docker/cli-plugins/
+curl -SL https://github.com/docker/compose/releases/download/v2.16.0/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+chmod +x ~/.docker/cli-plugins/docker-compose
+
+# Verificar instalación
+docker --version
+docker compose version
+```
+
+### 3. Clonar y Desplegar el Proyecto
+
+```bash
+# Crear directorio para el proyecto
+mkdir -p /opt/maps-scraper
+cd /opt/maps-scraper
+
+# Copiar archivos del proyecto
+# (puedes usar SCP, Git, o copiar y pegar manualmente)
+
+# Construir y levantar los contenedores
+docker compose up -d --build
+
+# Verificar que el contenedor está funcionando
+docker ps
+```
+
+### 4. Probar la API
+
+Una vez que el servicio esté en funcionamiento, puedes probar la API:
+
+```bash
+# Verificar que el servicio responde
+curl http://localhost:8000/
+
+# Realizar una búsqueda (reemplaza con tu propia solicitud)
+curl -X POST http://localhost:8000/search-google-maps \
+  -H "Content-Type: application/json" \
+  -d '{"municipality":"CDMX","especiality":"Japones","limit":5}'
+```
+
+### 5. Configuración de Firewall (Opcional)
+
+Para exponer el servicio de forma segura:
+
+```bash
+# Instalar y configurar UFW (Uncomplicated Firewall)
+apt install -y ufw
+ufw allow ssh
+ufw allow 8000/tcp
+ufw enable
+
+# Verificar reglas
+ufw status
+```
+
+## Uso de la API
+
+### Endpoints Disponibles
+
+- `GET /`: Health check
+- `POST /search-google-maps`: Buscar restaurantes en Google Maps
+
+### Ejemplo de Solicitud
 
 ```json
 {
-  "municipio": "Cancun",
-  "especialidad": "italiana",
-  "limite": 5
+  "municipality": "CDMX",
+  "especiality": "Japones",
+  "limit": 5
 }
 ```
 
-### Ejemplo de respuesta:
+### Ejemplo de Respuesta
 
 ```json
 {
-  "total_resultados": 5,
-  "restaurantes": [
+  "items": [
     {
-      "nombre": "Restaurante Italiano",
-      "direccion": "Av. Kukulcán 123, Zona Hotelera, Cancún",
-      "sitio_web": "https://restauranteitaliano.com",
-      "telefono": "+52 998 123 4567",
-      "num_reviews": 456,
-      "promedio_reviews": 4.7,
-      "compras_en_tienda": "No",
-      "recogida_en_tienda": "Yes",
-      "entrega": "Yes",
-      "tipo": "Restaurante italiano",
-      "horario_apertura": "12:00–23:00",
-      "introduccion": "Auténtica cocina italiana en Cancún con vistas al mar",
-      "municipio": "Cancun"
+      "name": "Nombre del Restaurante",
+      "addresse": "Dirección completa",
+      "website": "https://sitio-web.com",
+      "phone_number": "+52 55 1234 5678",
+      "schedule": "lunes: 1–11 p.m., martes: 1–11 p.m., ..."
     },
     ...
-  ],
-  "tiempo_ejecucion": 15.23
+  ]
 }
 ```
 
-## Despliegue en DigitalOcean
+## Mantenimiento
 
-### Utilizando App Platform
+### Ver Logs del Contenedor
 
-1. Sube el código a un repositorio Git (GitHub, GitLab, etc.)
-2. Regístrate o inicia sesión en [DigitalOcean](https://www.digitalocean.com/)
-3. Ve a App Platform y haz clic en "Create App"
-4. Conecta tu repositorio Git
-5. Selecciona la opción "Dockerfile" como tipo de componente
-6. Configura recursos según tus necesidades
-7. Despliega tu aplicación
-
-### Utilizando Droplet
-
-1. Crea un Droplet con la imagen de Docker en DigitalOcean
-2. Conéctate al Droplet por SSH
-3. Clona tu repositorio Git
-4. Ejecuta la aplicación con Docker Compose:
-   ```
-   docker-compose up -d
-   ```
-
-## Solución de Problemas
-
-### Error NotImplementedError en Windows con Python 3.13
-
-Si ves el siguiente error:
-```
-NotImplementedError
+```bash
+docker logs maps-scraper
 ```
 
-Esto ocurre debido a incompatibilidades entre Playwright, asyncio y Python 3.13 en Windows. Soluciones:
+### Reiniciar el Servicio
 
-1. **Recomendado**: Usa una versión anterior de Python (3.8-3.12)
-2. **Alternativa**: Ejecuta la aplicación en Docker, que usa Linux
+```bash
+cd /opt/maps-scraper
+docker compose restart
+```
 
-### Problemas con Playwright
+### Actualizar el Servicio
 
-Si tienes problemas con Playwright:
-
-1. Verifica que los navegadores están instalados:
-   ```
-   playwright install
-   ```
-
-2. Instala las dependencias del sistema para Playwright:
-   ```
-   playwright install-deps
-   ```
-
-## Advertencias
-
-- Este scraper puede ser bloqueado por Google si se utiliza de manera intensiva.
-- No está diseñado para producción sin medidas adicionales (rotación de IPs, delays aleatorios, etc.)
-- El uso excesivo puede violar los términos de servicio de Google.
-
-## Licencia
-
-[MIT](LICENSE)
+```bash
+cd /opt/maps-scraper
+# Actualiza los archivos necesarios
+docker compose down
+docker compose up -d --build
+```
 
 
-# maps-scrapper
