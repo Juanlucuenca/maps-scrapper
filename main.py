@@ -88,8 +88,12 @@ def search_google_maps(search_query: SearchGoogleMaps):
     if search_query.limit <= 0:
         return SearchGoogleMapsResponse(items=[])
     
-    # Dictionary to store unique restaurants by name to prevent duplicates
-    restaurant_dict = {}
+    # Initialize lists to store scraped data
+    names_list = []
+    address_list = []
+    website_list = []
+    phones_list = []
+    schedule_list = []
     
     with sync_playwright() as p:
         # Setup for Docker environment
@@ -109,8 +113,9 @@ def search_google_maps(search_query: SearchGoogleMaps):
             ]
         )
         
+        
         # Set viewport size
-        page = browser.new_page(viewport={"width": 1280, "height": 800})
+        page = browser.new_page(viewport={"width": 1280, "height": 800}, geolocation={"latitude": -34.603722, "longitude": -58.381592}, permissions=["geolocation"])
 
         try:
             # Navigate to Google Maps
@@ -144,8 +149,8 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 print(f"Currently Found: {current_count}")
                 
                 # Check if we've found enough listings
-                if current_count >= search_query.limit * 2:  # Get more to account for possible duplicates
-                    print(f"Found enough listings: {current_count} >= {search_query.limit * 2}")
+                if current_count >= search_query.limit:
+                    print(f"Found enough listings: {current_count} >= {search_query.limit}")
                     break
                     
                 # Check if we've reached all available listings
@@ -160,14 +165,12 @@ def search_google_maps(search_query: SearchGoogleMaps):
             
             # Get all available listings
             all_listings = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').all()
-            print(f"Total listings found: {len(all_listings)}")
             
-            # Limit to a larger number to account for possible duplicates
-            max_to_process = min(len(all_listings), search_query.limit * 2)
-            listings_to_process = all_listings[:max_to_process]
+            # Limit to the requested number
+            listings_to_process = all_listings[:search_query.limit]
             listings_to_process = [listing.locator("xpath=..") for listing in listings_to_process]
             
-            print(f"Processing {len(listings_to_process)} listings")
+            print(f"Processing {len(listings_to_process)} listings out of {len(all_listings)} found")
             
             # Define XPaths for the data we need
             name_xpath = '//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]'
@@ -176,55 +179,67 @@ def search_google_maps(search_query: SearchGoogleMaps):
             phone_xpath = '//button[contains(@data-item-id, "phone:tel:")]//div[contains(@class, "fontBodyMedium")]'
             
             # Scrape data for each listing
-            for i, listing in enumerate(listings_to_process):
+            for listing in listings_to_process:
                 try:
-                    # Break the loop if we have enough unique restaurants
-                    if len(restaurant_dict) >= search_query.limit:
-                        print(f"Reached desired limit of {search_query.limit} unique restaurants")
-                        break
-                    
                     listing.click()
                     # Wait for listing details to load
                     page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=10000)
-                    page.wait_for_timeout(2000)
+                    page.wait_for_timeout(3000)
                     
-                    # Extract name - this is our unique identifier
+                    # Extract name
                     name = extract_data(name_xpath, page)
-                    if not name:  # Skip if no name found
-                        print(f"No name found for listing {i+1}, skipping")
-                        continue
+                    names_list.append(name)
                     
-                    # Extract other data
+                    # Extract address
                     address = extract_data(address_xpath, page)
-                    website = extract_data(website_xpath, page)
-                    phone = extract_data(phone_xpath, page)
-                    schedule = extract_schedule(page)
+                    address_list.append(address)
                     
-                    # Only add if we don't already have this restaurant or if we have better data now
-                    if name not in restaurant_dict or not restaurant_dict[name].get("schedule"):
-                        restaurant_dict[name] = {
-                            "name": name,
-                            "addresse": address,
-                            "website": website,
-                            "phone_number": phone,
-                            "schedule": schedule
-                        }
-                        print(f"Added or updated restaurant: {name}")
+                    # Extract website
+                    website = extract_data(website_xpath, page)
+                    website_list.append(website)
+                    
+                    # Extract phone number
+                    phone = extract_data(phone_xpath, page)
+                    phones_list.append(phone)
+                    
+                    # Extract schedule using our enhanced function
+                    schedule = extract_schedule(page)
+                    schedule_list.append(schedule)
                     
                 except Exception as e:
-                    print(f"Error processing listing {i+1}: {e}")
-            
+                    print(f"Error processing listing: {e}")
+                    # Add empty values to maintain list alignment
+                    names_list.append("")
+                    address_list.append("")
+                    website_list.append("")
+                    phones_list.append("")
+                    schedule_list.append("")
         finally:
             # Always close the browser
             browser.close()
         
-        # Convert dictionary to list of response items
+        # Ensure all lists have the same length by finding the minimum length
+        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list), len(schedule_list))
+        
+        # Create response items
         response_items = [
-            SearchGoogleMapsResponseItem(**item_data)
-            for item_data in list(restaurant_dict.values())[:search_query.limit]
+            SearchGoogleMapsResponseItem(
+                name=name,
+                addresse=address,
+                website=website,
+                phone_number=phone,
+                schedule=schedule,
+            )
+            for name, address, website, phone, schedule
+            in zip(
+                names_list[:min_length], 
+                address_list[:min_length], 
+                website_list[:min_length], 
+                phones_list[:min_length], 
+                schedule_list[:min_length],
+            )
         ]
         
-        print(f"Returning {len(response_items)} unique restaurants")
         return SearchGoogleMapsResponse(items=response_items)
     
 if __name__ == "__main__":
