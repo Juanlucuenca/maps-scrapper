@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Instalar dependencias necesarias para Playwright y VNC
+# Instalar dependencias necesarias para Playwright
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -26,16 +26,8 @@ RUN apt-get update && apt-get install -y \
     libcurl4 \
     libdbus-1-3 \
     xvfb \
-    x11vnc \
-    fluxbox \
-    xterm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-
-# Configurar entorno VNC
-RUN mkdir -p ~/.vnc && \
-    echo "#!/bin/sh\nfluxbox &" > ~/.vnc/xstartup && \
-    chmod +x ~/.vnc/xstartup
 
 # Copiar los archivos de requerimientos
 COPY requirements.txt .
@@ -51,12 +43,8 @@ RUN pip install playwright && \
 # Copiar el código de la aplicación
 COPY . .
 
-# Configurar script de inicio con soporte VNC
-COPY ./start.sh /start.sh
-RUN chmod +x /start.sh
+# Puerto expuesto
+EXPOSE 8000
 
-# Puerto expuesto para la API y VNC
-EXPOSE 8000 5900
-
-# Comando para ejecutar la aplicación con VNC
-CMD ["/start.sh"] 
+# Comando para ejecutar la aplicación
+CMD ["python", "main.py"] 

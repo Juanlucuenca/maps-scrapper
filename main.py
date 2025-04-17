@@ -3,20 +3,6 @@ from pydantic import BaseModel
 from playwright.sync_api import sync_playwright
 import uvicorn
 import os
-import logging
-import time
-from datetime import datetime
-
-# Configurar logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler("debug.log"),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("maps-scraper")
 
 app = FastAPI(title="Google Maps Scraper API", 
              description="API para extraer información de restaurantes de Google Maps",
@@ -32,7 +18,7 @@ class SearchGoogleMapsResponseItem(BaseModel):
     addresse: str
     website: str
     phone_number: str
-    schedule: str
+    # schedule: str
     
 class SearchGoogleMapsResponse(BaseModel):
     items: list[SearchGoogleMapsResponseItem]
@@ -43,55 +29,54 @@ def extract_data(xpath, page):
         return page.locator(xpath).inner_text()
     return ""
 
-def extract_schedule(page):
-    """Extract complete schedule information from the page"""
-    # First try to get the current status (open/closed + next opening time)
-    current_status = ""
-    current_status_xpath = '//div[@class="MkV9"]//span[@class="ZDu9vd"]//span'
-    if page.locator(current_status_xpath).count() > 0:
-        current_status = page.locator(current_status_xpath).all_inner_texts()
-        current_status = " ".join([text.strip() for text in current_status if text.strip()])
+# def extract_schedule(page):
+#     """Extract complete schedule information from the page"""
+#     # First try to get the current status (open/closed + next opening time)
+#     current_status = ""
+#     current_status_xpath = '//div[@class="MkV9"]//span[@class="ZDu9vd"]//span'
+#     if page.locator(current_status_xpath).count() > 0:
+#         current_status = page.locator(current_status_xpath).all_inner_texts()
+#         current_status = " ".join([text.strip() for text in current_status if text.strip()])
     
-    # Try to click the hours dropdown if it exists
-    hours_dropdown_xpath = '//div[contains(@class, "OMl5r") and @role="button"]'
-    if page.locator(hours_dropdown_xpath).count() > 0:
-        try:
-            # Click to expand the hours
-            page.locator(hours_dropdown_xpath).click()
-            page.wait_for_timeout(1000)  # Wait for expansion
-        except Exception as e:
-            logger.warning(f"Error clicking hours dropdown: {e}")
+#     # Try to click the hours dropdown if it exists
+#     hours_dropdown_xpath = '//div[contains(@class, "OMl5r") and @role="button"]'
+#     if page.locator(hours_dropdown_xpath).count() > 0:
+#         try:
+#             # Click to expand the hours
+#             page.locator(hours_dropdown_xpath).click()
+#             page.wait_for_timeout(1000)  # Wait for expansion
+#         except:
+#             pass
     
     # Try to get the weekly schedule from the expanded view
-    weekly_schedule = ""
-    weekly_schedule_xpath = '//table[contains(@class, "eK4R0e")]//tbody//tr'
+    # weekly_schedule = ""
+    # weekly_schedule_xpath = '//table[contains(@class, "eK4R0e")]//tbody//tr'
     
-    if page.locator(weekly_schedule_xpath).count() > 0:
-        rows = page.locator(weekly_schedule_xpath).all()
-        schedule_parts = []
+    # if page.locator(weekly_schedule_xpath).count() > 0:
+    #     rows = page.locator(weekly_schedule_xpath).all()
+    #     schedule_parts = []
         
-        for row in rows:
-            try:
-                day = row.locator('td[contains(@class, "ylH6lf")]').inner_text().strip()
-                hours = row.locator('td[contains(@class, "mxowUb")]').inner_text().strip()
-                if day and hours:
-                    schedule_parts.append(f"{day}: {hours}")
-            except Exception as e:
-                logger.warning(f"Error extracting day/hours: {e}")
-                continue
+    #     for row in rows:
+    #         try:
+    #             day = row.locator('td[contains(@class, "ylH6lf")]').inner_text().strip()
+    #             hours = row.locator('td[contains(@class, "mxowUb")]').inner_text().strip()
+    #             if day and hours:
+    #                 schedule_parts.append(f"{day}: {hours}")
+    #         except:
+    #             continue
         
-        if schedule_parts:
-            weekly_schedule = ", ".join(schedule_parts)
+    #     if schedule_parts:
+    #         weekly_schedule = ", ".join(schedule_parts)
     
-    # If we got detailed schedule, return it, otherwise return current status
-    if weekly_schedule:
-        return weekly_schedule
-    elif current_status:
-        return current_status
+    # # If we got detailed schedule, return it, otherwise return current status
+    # if weekly_schedule:
+    #     return weekly_schedule
+    # elif current_status:
+    #     return current_status
     
-    # Fallback to the simple schedule xpath as last resort
-    simple_schedule_xpath = '//button[contains(@data-item-id, "oh")]//div[contains(@class, "fontBodyMedium")]'
-    return extract_data(simple_schedule_xpath, page)
+    # # Fallback to the simple schedule xpath as last resort
+    # simple_schedule_xpath = '//button[contains(@data-item-id, "oh")]//div[contains(@class, "fontBodyMedium")]'
+    # return extract_data(simple_schedule_xpath, page)
 
 @app.get("/")
 def read_root():
@@ -99,9 +84,6 @@ def read_root():
 
 @app.post("/search-google-maps")
 def search_google_maps(search_query: SearchGoogleMaps):
-    start_time = time.time()
-    logger.info(f"Starting search for {search_query.especiality} in {search_query.municipality} with limit {search_query.limit}")
-    
     # Validate the limit
     if search_query.limit <= 0:
         return SearchGoogleMapsResponse(items=[])
@@ -113,19 +95,14 @@ def search_google_maps(search_query: SearchGoogleMaps):
     phones_list = []
     schedule_list = []
     
-    # Track processed places to avoid duplicates
-    processed_places = set()
-    
     with sync_playwright() as p:
         # Setup for Docker environment
-        headless = os.environ.get("HEADLESS", "true").lower() == "true"
-        logger.info(f"Running in {'headless' if headless else 'non-headless'} mode")
         
         # Launch browser with appropriate settings for Docker
         browser_type = p.chromium
         
         browser = browser_type.launch(
-            headless=headless,
+            headless=False,
             args=[
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
@@ -135,23 +112,21 @@ def search_google_maps(search_query: SearchGoogleMaps):
             ]
         )
         
+        
         # Set viewport size
-        page = browser.new_page(viewport={"width": 1280, "height": 800})
+        page = browser.new_page(viewport={"width": 1280, "height": 800}, geolocation={"latitude": -34.603722, "longitude": -58.381592}, permissions=["geolocation"])
 
         try:
             # Navigate to Google Maps
-            logger.info("Navigating to Google Maps")
             page.goto("https://www.google.com/maps", timeout=60000)
             page.wait_for_timeout(1000)
 
             # Build search query combining municipality and especiality
             search_term = f"Restaurante {search_query.especiality} en Mexico, {search_query.municipality}"
-            logger.info(f"Searching for: {search_term}")
             page.locator('//input[@id="searchboxinput"]').fill(search_term)
             page.keyboard.press("Enter")
             
             # Wait for search results to appear
-            logger.info("Waiting for search results")
             page.wait_for_selector('//a[contains(@href, "https://www.google.com/maps/place")]', timeout=30000)
             page.hover('//a[contains(@href, "https://www.google.com/maps/place")]')
 
@@ -161,28 +136,27 @@ def search_google_maps(search_query: SearchGoogleMaps):
             max_iterations = 20  # Prevent infinite loops
             current_iterations = 0
             
-            logger.info("Starting scrolling to load listings")
             while current_iterations < max_iterations:
                 current_iterations += 1
                 
                 # Scroll down to load more results
                 page.mouse.wheel(0, 5000)
-                page.wait_for_timeout(1500)  # Give more time for results to load
+                page.wait_for_timeout(1000)  # Give time for results to load
                 
                 # Get count of current listings
                 current_count = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').count()
-                logger.info(f"Scrolling iteration {current_iterations}: Found {current_count} listings")
+                print(f"Currently Found: {current_count}")
                 
                 # Check if we've found enough listings
                 if current_count >= search_query.limit:
-                    logger.info(f"Found enough listings: {current_count} >= {search_query.limit}")
+                    print(f"Found enough listings: {current_count} >= {search_query.limit}")
                     break
                     
                 # Check if we've reached all available listings
                 if current_count == previously_counted:
                     same_count_iterations += 1
                     if same_count_iterations >= 3:  # If count hasn't changed for 3 iterations, assume we've loaded all available
-                        logger.info(f"Reached all available listings: {current_count}")
+                        print(f"Reached all available listings: {current_count}")
                         break
                 else:
                     same_count_iterations = 0
@@ -191,17 +165,11 @@ def search_google_maps(search_query: SearchGoogleMaps):
             # Get all available listings
             all_listings = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').all()
             
-            # Save a screenshot for debugging
-            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-            screenshot_path = f"logs/search_results_{timestamp}.png"
-            page.screenshot(path=screenshot_path)
-            logger.info(f"Saved search results screenshot to {screenshot_path}")
-            
             # Limit to the requested number
             listings_to_process = all_listings[:search_query.limit]
             listings_to_process = [listing.locator("xpath=..") for listing in listings_to_process]
             
-            logger.info(f"Processing {len(listings_to_process)} listings out of {len(all_listings)} found")
+            print(f"Processing {len(listings_to_process)} listings out of {len(all_listings)} found")
             
             # Define XPaths for the data we need
             name_xpath = '//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]'
@@ -210,63 +178,47 @@ def search_google_maps(search_query: SearchGoogleMaps):
             phone_xpath = '//button[contains(@data-item-id, "phone:tel:")]//div[contains(@class, "fontBodyMedium")]'
             
             # Scrape data for each listing
-            for idx, listing in enumerate(listings_to_process):
+            for listing in listings_to_process:
                 try:
-                    logger.info(f"Processing listing {idx+1}/{len(listings_to_process)}")
                     listing.click()
                     # Wait for listing details to load
-                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=10000)
+                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=30000)
                     page.wait_for_timeout(3000)
                     
                     # Extract name
                     name = extract_data(name_xpath, page)
-                    if not name:
-                        logger.warning(f"Could not extract name for listing {idx+1}")
-                        continue
+                    names_list.append(name)
                     
                     # Extract address
                     address = extract_data(address_xpath, page)
-                    
-                    # Create a unique identifier for the place (name + address)
-                    place_id = f"{name}|{address}"
-                    
-                    # Check if we already processed this place
-                    if place_id in processed_places:
-                        logger.info(f"Skipping duplicate place: {name}")
-                        continue
-                    
-                    # Mark as processed
-                    processed_places.add(place_id)
+                    address_list.append(address)
                     
                     # Extract website
                     website = extract_data(website_xpath, page)
+                    website_list.append(website)
                     
                     # Extract phone number
                     phone = extract_data(phone_xpath, page)
+                    phones_list.append(phone)
                     
                     # Extract schedule using our enhanced function
-                    schedule = extract_schedule(page)
-                    
-                    # Add to lists
-                    names_list.append(name)
-                    address_list.append(address)
-                    website_list.append(website)
-                    phones_list.append(phone)
-                    schedule_list.append(schedule)
-                    
-                    logger.info(f"Successfully extracted data for {name}")
-                    
-                    # Save a screenshot for debugging
-                    if idx < 3:  # Only save first 3 to save space
-                        screenshot_path = f"logs/place_{idx}_{timestamp}.png"
-                        page.screenshot(path=screenshot_path)
-                        logger.info(f"Saved place screenshot to {screenshot_path}")
+                    # schedule = extract_schedule(page)
+                    # schedule_list.append(schedule)
                     
                 except Exception as e:
-                    logger.error(f"Error processing listing {idx+1}: {e}")
+                    print(f"Error processing listing: {e}")
+                    # Add empty values to maintain list alignment
+                    names_list.append("")
+                    address_list.append("")
+                    website_list.append("")
+                    phones_list.append("")
+                    # schedule_list.append("")
         finally:
             # Always close the browser
             browser.close()
+        
+        # Ensure all lists have the same length by finding the minimum length
+        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list)) #len(schedule_list))
         
         # Create response items
         response_items = [
@@ -275,27 +227,21 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 addresse=address,
                 website=website,
                 phone_number=phone,
-                schedule=schedule,
+                # schedule=schedule,
             )
-            for name, address, website, phone, schedule
-            in zip(names_list, address_list, website_list, phones_list, schedule_list)
+            for name, address, website, phone, # schedule
+            in zip(
+                names_list[:min_length], 
+                address_list[:min_length], 
+                website_list[:min_length], 
+                phones_list[:min_length], 
+                # schedule_list[:min_length],
+            )
         ]
-        
-        elapsed_time = time.time() - start_time
-        logger.info(f"Search completed in {elapsed_time:.2f} seconds. Returning {len(response_items)} items.")
         
         return SearchGoogleMapsResponse(items=response_items)
     
 if __name__ == "__main__":
-    # Crear directorio de logs si no existe
-    os.makedirs("logs", exist_ok=True)
-    
-    # Imprimir la ruta de trabajo actual
-    logger.info(f"Directorio de trabajo actual: {os.getcwd()}")
-    
-    # Iniciar el servidor
     port = int(os.environ.get("PORT", 8000))
     host = os.environ.get("HOST", "0.0.0.0")
-    logger.info(f"Iniciando servidor en {host}:{port}")
-    
     uvicorn.run(app, host=host, port=port)
