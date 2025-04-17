@@ -54,18 +54,11 @@ def search_google_maps(search_query: SearchGoogleMaps):
         
         browser = browser_type.launch(
             headless=False,
-            args=[
-                '--disable-dev-shm-usage',
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-gpu',
-                '--disable-software-rasterizer',
-            ]
         )
         
         
         # Set viewport size
-        page = browser.new_page(viewport={"width": 1280, "height": 800}, geolocation={"latitude": -34.603722, "longitude": -58.381592}, permissions=["geolocation"])
+        page = browser.new_page()
 
         try:
             # Navigate to Google Maps
