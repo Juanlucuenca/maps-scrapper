@@ -64,7 +64,6 @@ def search_google_maps(search_query: SearchGoogleMaps):
             extra_http_headers={
                 'Accept-Language': 'es-AR,es;q=0.9',
                 'X-Forwarded-For': '190.190.181.164'
-                # Puedes agregar más encabezados si es necesario
             }
         )
         
@@ -74,7 +73,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
 
             
             # Ahora continuar con Google Maps
-            page.goto("https://www.google.com.ar/maps/@-32.955719,-60.6666752,14z?hl=es&entry=ttu&g_ep=EgoyMDI1MDQxNi4xIKXMDSoASAFQAw%3D%3D", timeout=60000)
+            page.goto("https://www.google.com.ar/maps/@-32.955719,-60.6666752,14z?hl=es&entry=ttu&g_ep=EgoyMDI1MDQxNi4xIKXMDSoASAFQAw%3D%3D", timeout=120000)
             page.wait_for_timeout(1000)
 
             # Modificar la búsqueda para que sea en Argentina, no en México
