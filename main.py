@@ -29,6 +29,55 @@ def extract_data(xpath, page):
         return page.locator(xpath).inner_text()
     return ""
 
+# def extract_schedule(page):
+#     """Extract complete schedule information from the page"""
+#     # First try to get the current status (open/closed + next opening time)
+#     current_status = ""
+#     current_status_xpath = '//div[@class="MkV9"]//span[@class="ZDu9vd"]//span'
+#     if page.locator(current_status_xpath).count() > 0:
+#         current_status = page.locator(current_status_xpath).all_inner_texts()
+#         current_status = " ".join([text.strip() for text in current_status if text.strip()])
+    
+#     # Try to click the hours dropdown if it exists
+#     hours_dropdown_xpath = '//div[contains(@class, "OMl5r") and @role="button"]'
+#     if page.locator(hours_dropdown_xpath).count() > 0:
+#         try:
+#             # Click to expand the hours
+#             page.locator(hours_dropdown_xpath).click()
+#             page.wait_for_timeout(1000)  # Wait for expansion
+#         except:
+#             pass
+    
+    # Try to get the weekly schedule from the expanded view
+    # weekly_schedule = ""
+    # weekly_schedule_xpath = '//table[contains(@class, "eK4R0e")]//tbody//tr'
+    
+    # if page.locator(weekly_schedule_xpath).count() > 0:
+    #     rows = page.locator(weekly_schedule_xpath).all()
+    #     schedule_parts = []
+        
+    #     for row in rows:
+    #         try:
+    #             day = row.locator('td[contains(@class, "ylH6lf")]').inner_text().strip()
+    #             hours = row.locator('td[contains(@class, "mxowUb")]').inner_text().strip()
+    #             if day and hours:
+    #                 schedule_parts.append(f"{day}: {hours}")
+    #         except:
+    #             continue
+        
+    #     if schedule_parts:
+    #         weekly_schedule = ", ".join(schedule_parts)
+    
+    # # If we got detailed schedule, return it, otherwise return current status
+    # if weekly_schedule:
+    #     return weekly_schedule
+    # elif current_status:
+    #     return current_status
+    
+    # # Fallback to the simple schedule xpath as last resort
+    # simple_schedule_xpath = '//button[contains(@data-item-id, "oh")]//div[contains(@class, "fontBodyMedium")]'
+    # return extract_data(simple_schedule_xpath, page)
+
 @app.get("/")
 def read_root():
     return {"message": "Health Check"}
@@ -44,6 +93,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
     address_list = []
     website_list = []
     phones_list = []
+    schedule_list = []
     
     with sync_playwright() as p:
         # Setup for Docker environment
@@ -53,37 +103,32 @@ def search_google_maps(search_query: SearchGoogleMaps):
         
         browser = browser_type.launch(
             headless=True,
+            args=[
+                '--disable-dev-shm-usage',
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+            ]
         )
         
-        # Configurar el contexto con ubicación de Argentina
-        context = browser.new_context(
-            locale='es-AR',  # Configurar el idioma como español de Argentina
-            timezone_id='America/Argentina/Buenos_Aires',  # Zona horaria de Argentina
-            geolocation={'latitude': -34.6037, 'longitude': -58.3816},  # Coordenadas de Buenos Aires
-            permissions=['geolocation'],
-            extra_http_headers={
-                'Accept-Language': 'es-AR,es;q=0.9',
-                'X-Forwarded-For': '190.190.181.164'
-            }
-        )
         
-        page = context.new_page()
+        # Set viewport size
+        page = browser.new_page(viewport={"width": 1280, "height": 800}, geolocation={"latitude": -34.603722, "longitude": -58.381592}, permissions=["geolocation"])
 
         try:
-
-            
-            # Ahora continuar con Google Maps
-            page.goto("https://www.google.com.ar/maps/@-32.955719,-60.6666752,14z?hl=es&entry=ttu&g_ep=EgoyMDI1MDQxNi4xIKXMDSoASAFQAw%3D%3D", timeout=120000)
+            # Navigate to Google Maps
+            page.goto("https://www.google.com.ar/maps", timeout=60000)
             page.wait_for_timeout(1000)
 
-            # Modificar la búsqueda para que sea en Argentina, no en México
-            search_term = f"Restaurante {search_query.especiality} en {search_query.municipality}, Argentina"
+            # Build search query combining municipality and especiality
+            search_term = f"Restaurante {search_query.especiality} en Mexico, {search_query.municipality}"
             page.locator('//input[@id="searchboxinput"]').fill(search_term)
             page.keyboard.press("Enter")
             
             # Wait for search results to appear
-            page.wait_for_selector('//a[contains(@href, "https://www.google.com/maps/place")]', timeout=30000)
-            page.hover('//a[contains(@href, "https://www.google.com/maps/place")]')
+            page.wait_for_selector('//a[contains(@href, "https://www.google.com.ar/maps/place")]', timeout=30000)
+            page.hover('//a[contains(@href, "https://www.google.com.ar/maps/place")]')
 
             # Scroll to load enough listings
             previously_counted = 0
@@ -99,7 +144,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 page.wait_for_timeout(1000)  # Give time for results to load
                 
                 # Get count of current listings
-                current_count = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').count()
+                current_count = page.locator('//a[contains(@href, "https://www.google.com.ar/maps/place")]').count()
                 print(f"Currently Found: {current_count}")
                 
                 # Check if we've found enough listings
@@ -118,7 +163,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     previously_counted = current_count
             
             # Get all available listings
-            all_listings = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').all()
+            all_listings = page.locator('//a[contains(@href, "https://www.google.com.ar/maps/place")]').all()
             
             # Limit to the requested number
             listings_to_process = all_listings[:search_query.limit]
@@ -137,8 +182,8 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 try:
                     listing.click()
                     # Wait for listing details to load
-                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=10000)
-                    page.wait_for_timeout(1000)
+                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=30000)
+                    page.wait_for_timeout(3000)
                     
                     # Extract name
                     name = extract_data(name_xpath, page)
@@ -156,6 +201,10 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     phone = extract_data(phone_xpath, page)
                     phones_list.append(phone)
                     
+                    # Extract schedule using our enhanced function
+                    # schedule = extract_schedule(page)
+                    # schedule_list.append(schedule)
+                    
                 except Exception as e:
                     print(f"Error processing listing: {e}")
                     # Add empty values to maintain list alignment
@@ -163,41 +212,33 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     address_list.append("")
                     website_list.append("")
                     phones_list.append("")
+                    # schedule_list.append("")
         finally:
             # Always close the browser
             browser.close()
         
         # Ensure all lists have the same length by finding the minimum length
-        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list))
+        min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list)) #len(schedule_list))
         
         # Create response items
-        # Create a dictionary to track unique names and their data
-        unique_items = {}
-        for name, address, website, phone in zip(
-            names_list[:min_length],
-            address_list[:min_length],
-            website_list[:min_length],
-            phones_list[:min_length],
-        ):
-            # Only keep the first occurrence of each name
-            if name and name not in unique_items:
-                unique_items[name] = {
-                    "address": address,
-                    "website": website, 
-                    "phone": phone
-                }
-        
-        # Convert unique items to response format
         response_items = [
             SearchGoogleMapsResponseItem(
                 name=name,
-                addresse=data["address"],
-                website=data["website"],
-                phone_number=data["phone"]
+                addresse=address,
+                website=website,
+                phone_number=phone,
+                # schedule=schedule,
             )
-            for name, data in unique_items.items()
+            for name, address, website, phone, # schedule
+            in zip(
+                names_list[:min_length], 
+                address_list[:min_length], 
+                website_list[:min_length], 
+                phones_list[:min_length], 
+                # schedule_list[:min_length],
+            )
         ]
-
+        
         return SearchGoogleMapsResponse(items=response_items)
     
 if __name__ == "__main__":
