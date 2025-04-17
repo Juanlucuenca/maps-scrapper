@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    restart: always
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - TZ=America/Mexico_City 

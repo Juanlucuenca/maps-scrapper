@@ -1,0 +1,147 @@
+2025-04-17 00:11:16,667 - INFO - Iniciando búsqueda de restaurantes en: Ciudad de mexico
+2025-04-17 00:11:16,668 - INFO - Especialidad: Marisqueria
+2025-04-17 00:11:16,668 - INFO - Término de búsqueda: restaurantes Marisqueria en Ciudad de mexico México
+2025-04-17 00:11:16,668 - ERROR - Error en la búsqueda: It looks like you are using Playwright Sync API inside the asyncio loop.
+Please use the Async API instead.
+2025-04-17 00:11:16,669 - ERROR - Error en la búsqueda: 500: Error al buscar restaurantes: It looks like you are using Playwright Sync API inside the asyncio loop.
+Please use the Async API instead.
+2025-04-17 00:13:17,148 - INFO - Iniciando búsqueda de restaurantes en: Ciudad de mexico
+2025-04-17 00:13:17,149 - INFO - Especialidad: Marisqueria
+2025-04-17 00:13:17,149 - INFO - Término de búsqueda: restaurantes Marisqueria en Ciudad de mexico México
+2025-04-17 00:13:17,150 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-5' coro=<Connection.run() done, defined at C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:272> exception=NotImplementedError()>
+Traceback (most recent call last):
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 279, in run
+    await self._transport.connect()
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 133, in connect
+    raise exc
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 120, in connect
+    self._proc = await asyncio.create_subprocess_exec(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\subprocess.py", line 224, in create_subprocess_exec
+    transport, protocol = await loop.subprocess_exec(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        stderr=stderr, **kwds)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 1787, in subprocess_exec
+    transport = await self._make_subprocess_transport(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        protocol, popen_args, False, stdin, stdout, stderr,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        bufsize, **kwargs)
+        ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 534, in _make_subprocess_transport
+    raise NotImplementedError
+NotImplementedError
+2025-04-17 00:13:17,186 - ERROR - Error en la búsqueda: 
+2025-04-17 00:13:17,186 - ERROR - Error en la búsqueda: 500: Error al buscar restaurantes: 
+2025-04-17 00:13:47,162 - INFO - Iniciando búsqueda de restaurantes en: Ciudad de mexico
+2025-04-17 00:13:47,163 - INFO - Especialidad: Marisqueria
+2025-04-17 00:13:47,164 - INFO - Término de búsqueda: restaurantes Marisqueria en Ciudad de mexico México
+2025-04-17 00:13:47,164 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-8' coro=<Connection.run() done, defined at C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:272> exception=NotImplementedError()>
+Traceback (most recent call last):
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 279, in run
+    await self._transport.connect()
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 133, in connect
+    raise exc
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 120, in connect
+    self._proc = await asyncio.create_subprocess_exec(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\subprocess.py", line 224, in create_subprocess_exec
+    transport, protocol = await loop.subprocess_exec(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        stderr=stderr, **kwds)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 1787, in subprocess_exec
+    transport = await self._make_subprocess_transport(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        protocol, popen_args, False, stdin, stdout, stderr,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        bufsize, **kwargs)
+        ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 534, in _make_subprocess_transport
+    raise NotImplementedError
+NotImplementedError
+2025-04-17 00:13:47,167 - ERROR - Error en la búsqueda: 
+2025-04-17 00:13:47,167 - ERROR - Error en la búsqueda: 500: Error al buscar restaurantes: 
+2025-04-17 00:15:53,130 - INFO - Iniciando búsqueda de restaurantes en: Ciudad de mexico
+2025-04-17 00:15:53,130 - INFO - Especialidad: Marisqueria
+2025-04-17 00:15:53,131 - INFO - Término de búsqueda: restaurantes Marisqueria en Ciudad de mexico México
+2025-04-17 00:15:53,131 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-5' coro=<Connection.run() done, defined at C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:272> exception=NotImplementedError()>
+Traceback (most recent call last):
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 279, in run
+    await self._transport.connect()
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 133, in connect
+    raise exc
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 120, in connect
+    self._proc = await asyncio.create_subprocess_exec(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\subprocess.py", line 224, in create_subprocess_exec
+    transport, protocol = await loop.subprocess_exec(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        stderr=stderr, **kwds)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 1787, in subprocess_exec
+    transport = await self._make_subprocess_transport(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        protocol, popen_args, False, stdin, stdout, stderr,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        bufsize, **kwargs)
+        ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 534, in _make_subprocess_transport
+    raise NotImplementedError
+NotImplementedError
+2025-04-17 00:15:53,134 - ERROR - Error de compatibilidad detectado (NotImplementedError). Esto puede ocurrir con Python 3.13 en Windows.
+2025-04-17 00:15:53,134 - ERROR - Por favor, intente ejecutar esta aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
+2025-04-17 00:15:53,134 - ERROR - Error en la búsqueda: 500: Error de compatibilidad con Playwright. Esto puede ocurrir con Python 3.13 en Windows. Por favor, ejecute la aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
+2025-04-17 00:15:53,135 - ERROR - Error en la búsqueda: 500: Error al buscar restaurantes: 500: Error de compatibilidad con Playwright. Esto puede ocurrir con Python 3.13 en Windows. Por favor, ejecute la aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
+2025-04-17 00:16:53,249 - INFO - Iniciando búsqueda de restaurantes en: Ciudad de mexico
+2025-04-17 00:16:53,250 - INFO - Especialidad: Marisqueria
+2025-04-17 00:16:53,250 - INFO - Término de búsqueda: restaurantes Marisqueria en Ciudad de mexico México
+2025-04-17 00:16:53,250 - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-5' coro=<Connection.run() done, defined at C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:272> exception=NotImplementedError()>
+Traceback (most recent call last):
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py", line 279, in run
+    await self._transport.connect()
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 133, in connect
+    raise exc
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_transport.py", line 120, in connect
+    self._proc = await asyncio.create_subprocess_exec(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\subprocess.py", line 224, in create_subprocess_exec
+    transport, protocol = await loop.subprocess_exec(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        stderr=stderr, **kwds)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 1787, in subprocess_exec
+    transport = await self._make_subprocess_transport(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        protocol, popen_args, False, stdin, stdout, stderr,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        bufsize, **kwargs)
+        ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\PC\AppData\Local\Programs\Python\Python313\Lib\asyncio\base_events.py", line 534, in _make_subprocess_transport
+    raise NotImplementedError
+NotImplementedError
+2025-04-17 00:16:53,253 - ERROR - Error de compatibilidad detectado (NotImplementedError). Esto puede ocurrir con Python 3.13 en Windows.
+2025-04-17 00:16:53,253 - ERROR - Por favor, intente ejecutar esta aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
+2025-04-17 00:16:53,254 - ERROR - Error en la búsqueda: 500: Error de compatibilidad con Playwright. Esto puede ocurrir con Python 3.13 en Windows. Por favor, ejecute la aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
+2025-04-17 00:16:53,254 - ERROR - Error en la búsqueda: 500: Error al buscar restaurantes: 500: Error de compatibilidad con Playwright. Esto puede ocurrir con Python 3.13 en Windows. Por favor, ejecute la aplicación con Python 3.8-3.12 o en un entorno Docker/Linux.
