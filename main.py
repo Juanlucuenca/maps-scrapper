@@ -88,6 +88,8 @@ def search_google_maps(search_query: SearchGoogleMaps):
     if search_query.limit <= 0:
         return SearchGoogleMapsResponse(items=[])
     
+    search_query.limit = search_query.limit * 4
+    
     # Initialize lists to store scraped data
     names_list = []
     address_list = []
@@ -221,24 +223,33 @@ def search_google_maps(search_query: SearchGoogleMaps):
         min_length = min(len(names_list), len(address_list), len(website_list), len(phones_list)) #len(schedule_list))
         
         # Create response items
+        # Create a dictionary to track unique names and their data
+        unique_items = {}
+        for name, address, website, phone in zip(
+            names_list[:min_length],
+            address_list[:min_length],
+            website_list[:min_length],
+            phones_list[:min_length],
+        ):
+            # Only keep the first occurrence of each name
+            if name and name not in unique_items:
+                unique_items[name] = {
+                    "address": address,
+                    "website": website, 
+                    "phone": phone
+                }
+        
+        # Convert unique items to response format
         response_items = [
             SearchGoogleMapsResponseItem(
                 name=name,
-                addresse=address,
-                website=website,
-                phone_number=phone,
-                # schedule=schedule,
+                addresse=data["address"],
+                website=data["website"],
+                phone_number=data["phone"]
             )
-            for name, address, website, phone, # schedule
-            in zip(
-                names_list[:min_length], 
-                address_list[:min_length], 
-                website_list[:min_length], 
-                phones_list[:min_length], 
-                # schedule_list[:min_length],
-            )
+            for name, data in unique_items.items()
         ]
-        
+
         return SearchGoogleMapsResponse(items=response_items)
     
 if __name__ == "__main__":
