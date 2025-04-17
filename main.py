@@ -29,55 +29,6 @@ def extract_data(xpath, page):
         return page.locator(xpath).inner_text()
     return ""
 
-# def extract_schedule(page):
-#     """Extract complete schedule information from the page"""
-#     # First try to get the current status (open/closed + next opening time)
-#     current_status = ""
-#     current_status_xpath = '//div[@class="MkV9"]//span[@class="ZDu9vd"]//span'
-#     if page.locator(current_status_xpath).count() > 0:
-#         current_status = page.locator(current_status_xpath).all_inner_texts()
-#         current_status = " ".join([text.strip() for text in current_status if text.strip()])
-    
-#     # Try to click the hours dropdown if it exists
-#     hours_dropdown_xpath = '//div[contains(@class, "OMl5r") and @role="button"]'
-#     if page.locator(hours_dropdown_xpath).count() > 0:
-#         try:
-#             # Click to expand the hours
-#             page.locator(hours_dropdown_xpath).click()
-#             page.wait_for_timeout(1000)  # Wait for expansion
-#         except:
-#             pass
-    
-    # Try to get the weekly schedule from the expanded view
-    # weekly_schedule = ""
-    # weekly_schedule_xpath = '//table[contains(@class, "eK4R0e")]//tbody//tr'
-    
-    # if page.locator(weekly_schedule_xpath).count() > 0:
-    #     rows = page.locator(weekly_schedule_xpath).all()
-    #     schedule_parts = []
-        
-    #     for row in rows:
-    #         try:
-    #             day = row.locator('td[contains(@class, "ylH6lf")]').inner_text().strip()
-    #             hours = row.locator('td[contains(@class, "mxowUb")]').inner_text().strip()
-    #             if day and hours:
-    #                 schedule_parts.append(f"{day}: {hours}")
-    #         except:
-    #             continue
-        
-    #     if schedule_parts:
-    #         weekly_schedule = ", ".join(schedule_parts)
-    
-    # # If we got detailed schedule, return it, otherwise return current status
-    # if weekly_schedule:
-    #     return weekly_schedule
-    # elif current_status:
-    #     return current_status
-    
-    # # Fallback to the simple schedule xpath as last resort
-    # simple_schedule_xpath = '//button[contains(@data-item-id, "oh")]//div[contains(@class, "fontBodyMedium")]'
-    # return extract_data(simple_schedule_xpath, page)
-
 @app.get("/")
 def read_root():
     return {"message": "Health Check"}
@@ -87,8 +38,6 @@ def search_google_maps(search_query: SearchGoogleMaps):
     # Validate the limit
     if search_query.limit <= 0:
         return SearchGoogleMapsResponse(items=[])
-    
-    search_query.limit = search_query.limit * 4
     
     # Initialize lists to store scraped data
     names_list = []
@@ -104,7 +53,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
-            headless=True,
+            headless=False,
             args=[
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
