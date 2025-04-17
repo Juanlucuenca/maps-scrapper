@@ -103,6 +103,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
+            proxy={"server": "http://200.61.16.80:8080"},
             headless=headless,
             args=[
                 '--disable-dev-shm-usage',
