@@ -104,7 +104,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
-            headless=False,
+            headless=True,
             args=[
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
@@ -184,8 +184,8 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 try:
                     listing.click()
                     # Wait for listing details to load
-                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=30000)
-                    page.wait_for_timeout(3000)
+                    page.wait_for_selector('//div[@class="TIHn2 "]//h1[@class="DUwDvf lfPIob"]', timeout=10000)
+                    page.wait_for_timeout(1000)
                     
                     # Extract name
                     name = extract_data(name_xpath, page)
