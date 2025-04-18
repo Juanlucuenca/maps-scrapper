@@ -102,7 +102,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
-            headless=True,
+            headless=False,
             args=[
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
@@ -118,7 +118,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
 
         try:
             # Navigate to Google Maps
-            page.goto("https://www.google.com.ar/maps", timeout=60000)
+            page.goto("https://www.google.com/maps?gl=AR&hl=es", timeout=60000)
             page.wait_for_timeout(1000)
 
             # Build search query combining municipality and especiality
@@ -127,8 +127,8 @@ def search_google_maps(search_query: SearchGoogleMaps):
             page.keyboard.press("Enter")
             
             # Wait for search results to appear
-            page.wait_for_selector('//a[contains(@href, "https://www.google.com.ar/maps/place")]', timeout=30000)
-            page.hover('//a[contains(@href, "https://www.google.com.ar/maps/place")]')
+            page.wait_for_selector('//a[contains(@href, "https://www.google.com/maps/place")]', timeout=30000)
+            page.hover('//a[contains(@href, "https://www.google.com/maps/place")]')
 
             # Scroll to load enough listings
             previously_counted = 0
@@ -144,7 +144,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
                 page.wait_for_timeout(1000)  # Give time for results to load
                 
                 # Get count of current listings
-                current_count = page.locator('//a[contains(@href, "https://www.google.com.ar/maps/place")]').count()
+                current_count = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').count()
                 print(f"Currently Found: {current_count}")
                 
                 # Check if we've found enough listings
@@ -163,7 +163,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
                     previously_counted = current_count
             
             # Get all available listings
-            all_listings = page.locator('//a[contains(@href, "https://www.google.com.ar/maps/place")]').all()
+            all_listings = page.locator('//a[contains(@href, "https://www.google.com/maps/place")]').all()
             
             # Limit to the requested number
             listings_to_process = all_listings[:search_query.limit]

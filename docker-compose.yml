@@ -11,39 +11,10 @@ services:
       - HEADLESS=true
       - PORT=8000
       - HOST=0.0.0.0
-      - REPO_URL=https://github.com/Juanlucuenca/maps-scrapper.git
-      - BRANCH=main
-      - AUTO_UPDATE=true
     volumes:
       - ./logs:/app/logs
-      - maps_data:/app/data
-      - maps_code:/app/code
     deploy:
       resources:
         limits:
           cpus: '1'
           memory: 2G
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
-      interval: 1m
-      timeout: 10s
-      retries: 3
-      start_period: 30s
-
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 --cleanup maps-scraper
-    environment:
-      - TZ=America/Argentina/Buenos_Aires
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=3600
-
-volumes:
-  maps_data:
-    name: maps_scraper_data
-  maps_code:
-    name: maps_scraper_code
