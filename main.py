@@ -102,7 +102,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
-            headless=False,
+            headless=True,
             args=[
                 '--disable-dev-shm-usage',
                 '--no-sandbox',
