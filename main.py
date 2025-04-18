@@ -102,6 +102,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
         browser_type = p.chromium
         
         browser = browser_type.launch(
+            proxy={"server": "http://185.199.228.220:7300", "username": "xzqmorzt", "password": "hcfsx0gx24wg"},
             headless=True,
             args=[
                 '--disable-dev-shm-usage',
@@ -118,7 +119,7 @@ def search_google_maps(search_query: SearchGoogleMaps):
 
         try:
             # Navigate to Google Maps
-            page.goto("https://www.google.com/maps?gl=AR&hl=es", timeout=60000)
+            page.goto("https://www.google.com/maps?gl=AR&hl=es", timeout=100000)
             page.wait_for_timeout(1000)
 
             # Build search query combining municipality and especiality
